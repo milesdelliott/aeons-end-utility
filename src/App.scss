@@ -1,0 +1,88 @@
+* {
+  background: none repeat scroll 0 0 transparent;
+  border: medium none;
+  border-spacing: 0;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  text-decoration: none;
+  text-indent: 0;
+  box-sizing: border-box;
+  list-style-type: none; }
+
+html, body, #root, .App {
+  height: 100vh;
+  width: 100vw;
+  position: absolute; }
+
+.App {
+  display: flex;
+  justify-content: space-around;
+  justify-content: flex-start;
+  flex-flow: column; }
+
+.deck {
+  display: flex;
+  flex-flow: row;
+  height: 10rem;
+}
+
+
+.card {
+
+  width: 10rem;
+  height: 7rem;
+
+  position: relative;
+  overflow-x: visible;
+  z-index: 1;
+
+
+&-inner {
+position: absolute;
+border-radius: 3px;
+border: solid 3px black;
+background-color: white;
+display: flex;
+justify-content: space-between;
+flex-direction: column;
+height: 10rem;
+width: 7rem;
+padding: .25rem;
+}
+
+&-letter {
+  font-weight: bold;
+  font-size: 1.5rem;
+
+
+
+&:first-child {
+  align-self: flex-start;
+}
+
+&:last-child {
+align-self: flex-end;
+}
+}
+
+&--faceup {
+  z-index: 5;
+}
+
+&--facedown .card-inner{
+  background-color: black;
+}
+}
+
+.shuffle-button {
+    width: 6rem;
+    margin: 0 3.5rem;
+    height: 3rem;
+    border-radius: 3rem;
+    text-align: center;
+    color: white;
+    background: #333;
+    align-self: center;
+    z-index: 10;
+}
