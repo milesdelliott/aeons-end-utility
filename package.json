@@ -2,6 +2,7 @@
   "name": "aeons-end-utility",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://milesdelliott.github.io/aeons-end-utility/",
   "dependencies": {
     "react": "15.4.2",
     "react-dom": "15.4.2"

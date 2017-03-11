@@ -86,3 +86,28 @@ align-self: flex-end;
     align-self: center;
     z-index: 10;
 }
+.counters {
+  flex-basis: 4;
+  display: flex;
+  justify-content: space-between; }
+
+.modal {
+  background-color: #f2f2f2;
+  border: solid black 1px;
+  height: 20rem;
+  width: 20rem;
+  position: absolute;
+  align-self: center;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem; }
+  .modal-input {
+    border: inherit;
+    margin: 1rem;
+    padding: 1rem; }
+  .modal-button {
+    margin: 1rem; }
+  .modal--false {
+    display: none; }
+  .modal--true {
+    display: flex; }

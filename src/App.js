@@ -8,12 +8,18 @@ var aeonsUtility = {
 
   },
 
+  modal: {
+    active: false,
+    parent: false,
+    target: null
+  },
+
   counters: [],
 
   flipIndex: 0,
 
   nemesis: {
-    name: "",
+    name: "Nemesis",
     life: 70,
     counters: []
   },
@@ -109,8 +115,23 @@ function Counter(props) {
   return (
     <li className="counter">
       <h3 className="counter-name" onClick={handleClick}>{props.name}</h3>
-      <CountButton aria-label="add count" onClick={props.addCount} effectClass="add" {...props}>+</CountButton><p className="counter-count">{props.life}</p><CountButton effectClass="minus" onClick={props.minusCount} aria-label="minus count" {...props}>-</CountButton>
+      <CountButton aria-label="add count" isCounter onClick={props.addCount} effectClass="add" {...props}>+</CountButton><p className="counter-count">{props.life}</p><CountButton isCounter effectClass="minus" onClick={props.minusCount} aria-label="minus count" {...props}>-</CountButton>
     </li>
+  );
+}
+
+function Nemesis(props) {
+
+  function handleClick(e) {
+    e.preventDefault();
+    props.openModal(props.id);
+  }
+
+  return (
+    <div className="counter">
+      <h3 className="counter-name" onClick={handleClick}>{props.name}</h3>
+      <CountButton aria-label="add count" onClick={props.addCount} effectClass="add" {...props}>+</CountButton><p className="counter-count">{props.life}</p><CountButton effectClass="minus" onClick={props.minusCount} aria-label="minus count" {...props}>-</CountButton>
+    </div>
   );
 }
 
@@ -118,7 +139,7 @@ function Counter(props) {
 function CountButton(props) {
   function handleClick(e) {
     e.preventDefault();
-    props.onClick(props.id, true);
+    props.onClick(props.id, props.isCounter);
   }
   return (
     <button role="button" className={"button count-button count-button-" + props.effectClass} onClick={handleClick}>
@@ -152,6 +173,56 @@ function Setting(props) {
   return (
     <button type="submit" onClick={handleClick}>{props.text}</button>
   );
+}
+
+class Modal extends Component {
+  constructor(props) {
+    super(props);
+    console.log(this.props.data);
+    this.state = {
+      name: this.props.data.name,
+      color: this.props.data.color
+    }
+
+
+
+  }
+
+  handleClick = (e) => {
+    e.preventDefault();
+    this.props.saveData(this.props.target, this.state.name, this.state.color, this.props.parent);
+    this.setState({name:'', color: ''});
+  }
+
+  handleNameChange = (event) => {
+    this.setState({ name: event.target.value });
+  };
+
+  handleColorChange = (event) => {
+    this.setState({ color: event.target.value });
+  };
+
+  debug = () => {console.log(this.props)};
+
+  render() {
+
+    return (
+      <div className={"modal modal--" + this.props.active}>
+        <input className="modal-input"
+          type="text"
+          value={this.state.name}
+          onChange={this.handleNameChange}
+        />
+        <input className="modal-input"
+          type="text"
+          value={this.state.color}
+          onChange={this.handleColorChange}
+        />
+         <button onClick={this.handleClick} className="modal-button button button-save" type="submit">Save</button>
+         <Debug onClick={this.debug} />
+      </div>
+    );
+  }
 }
 
 class Deck extends Component {
@@ -299,6 +370,44 @@ minusLife = (entity, isCounter) => {
 
   }
 
+  openModal = (entityID, isCounter, parentID) => {
+    //targetLocation =
+    var newInput = {
+      target: entityID,
+      parent: parentID,
+      active: true
+    }
+    this.setState({modal: newInput})
+  }
+
+  closeModal = (playerID) => {
+    var newInput = {
+      target: null,
+      parent: false,
+      active: false
+    }
+    this.setState({modal: newInput})
+  }
+
+  saveData = (entityID, name, color, parentID) => {
+    var newInput = {
+      target: entityID,
+      parent: parentID,
+      active: false
+    }
+    let newPlayers = this.state.players;
+    if (!parentID) {
+      newPlayers[entityID].name = name;
+      newPlayers[entityID].color = color;
+    } else {
+      newPlayers[parentID].counters[entityID].name = name;
+      newPlayers[parentID].counters[entityID].color = color;
+    }
+
+    this.setState({modal: newInput,
+    players: newPlayers});
+  }
+
   render() {
     return (
       <div className="App">
@@ -307,12 +416,15 @@ minusLife = (entity, isCounter) => {
         <Setting onClick={this.changePlayerCount} value={3} text="Three Player" />
         <Setting onClick={this.changePlayerCount} value={4} text="Four Player" />
         <Deck settings={this.state.settings} shuffle={this.shuffle} flipCard={this.flipCard} flipIndex={this.state.flipIndex} deckName="turnDeck" deckObj={this.state.turnDeck} classes="turnDeck" cardClasses={"turnDeck turnDeck-card"}  />
+        <Nemesis name={this.state.nemesis.name} openModal={this.openModal} id="nemesis" life={this.state.nemesis.life} addCount={this.addLife} minusCount={this.minusLife} />
         <AddCounterButton onClick={this.addCounter} />
         <ul className="counters">
           {this.state.nemesis.counters.map((counter, i) =>
             <Counter name={counter.name} openModal={this.openModal} id={counter.id} life={counter.life} addCount={this.addLife} minusCount={this.minusLife} key={i} />
           )}
         </ul>
+        { () => {return (<Modal saveData={this.saveData} active={this.state.modal.active} target={this.state.modal.target} parent={this.state.modal.parent} data={this.state.modal.parent ? this.state.players[this.state.modal.parent].counters[this.state.modal.target] : this.state.players[this.state.modal.target]} />)}
+        }
       </div>
     );
   }
