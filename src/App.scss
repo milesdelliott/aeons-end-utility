@@ -1,3 +1,10 @@
+$color-dark: #333;
+$color-light: #f2f2f2;
+$bright: #ffffff;
+
+$color-main: $color-light;
+$color-alt: $color-dark;
+
 * {
   background: none repeat scroll 0 0 transparent;
   border: medium none;
@@ -25,6 +32,8 @@ html, body, #root, .App {
   display: flex;
   flex-flow: row;
   height: 10rem;
+  cursor: pointer;
+  align-items: flex-start;
 }
 
 
@@ -38,61 +47,168 @@ html, body, #root, .App {
   z-index: 1;
 
 
-&-inner {
-position: absolute;
-border-radius: 3px;
-border: solid 3px black;
-background-color: white;
-display: flex;
-justify-content: space-between;
-flex-direction: column;
-height: 10rem;
-width: 7rem;
-padding: .25rem;
+
+  &-inner {
+  position: absolute;
+  border-radius: 0.3rem;
+  border: solid #c9c9c9 0.3rem;
+  background-color: #f2f2f2;
+  box-shadow: -0.2rem 0.2rem 0 rgba(100,100,100,0.1);
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  height: 10rem;
+  width: 7rem;
+  padding: .25rem;
+    &:hover {
+      background: #fff;
+      box-shadow: -0.3rem 0.3rem 0 rgba(100,100,100,0.1);
+    }
+  }
+
+  &-letter {
+    font-weight: bold;
+    font-size: 1.5rem;
+
+
+
+    &:first-child {
+      align-self: flex-start;
+    }
+
+    &:last-child {
+    align-self: flex-end;
+    }
+  }
+
+  &--faceup {
+    z-index: 5;
+  }
+
+  &--facedown {
+    .card-letter, .card-name {
+      display: none;
+    }
+    .card-inner{
+      background-color: $color-alt;
+      border-color: #000;
+      box-shadow-color: #000;
+    }
+  }
 }
 
-&-letter {
-  font-weight: bold;
-  font-size: 1.5rem;
+.button {
+  z-index: 10;
+  text-align: center;
+  margin: .75rem 1rem;
+  padding: 0.3rem 0.6rem;
+  max-width: 50%;
+  border-radius: 10rem;
+  color: $bright;
+  background: $color-alt;
+  font-size: 1rem;
+  align-self: center;
+  cursor: pointer;
+  border: solid transparent 1px;
 
-
-
-&:first-child {
-  align-self: flex-start;
-}
-
-&:last-child {
-align-self: flex-end;
-}
-}
-
-&--faceup {
-  z-index: 5;
-}
-
-&--facedown .card-inner{
-  background-color: black;
-}
-}
-
-.shuffle-button {
+  &-shuffle {
     width: 6rem;
     margin: 0 3.5rem;
     height: 3rem;
     border-radius: 3rem;
-    text-align: center;
-    color: white;
-    background: #333;
     align-self: center;
-    z-index: 10;
+    cursor: pointer;
+
+  }
+
+  &-count-add {
+    background-color: #207010;
+    order: 4;
+  }
+
+  &-count-minus {
+    background-color: #600000;
+    order: 2;
+  }
+  &:hover {
+    background-color: $color-main;
+    border-color: $color-alt;
+    color: $color-alt;
+  }
+
 }
+
+.entities {
+display: flex;
+justify-content: space-around;
+}
+
 .counters {
   flex-basis: 4;
   display: flex;
-  justify-content: space-between; }
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+  .counter {
+    padding: 0.5rem;
+    margin: 1rem 0.5rem;
+    flex: 1 1 auto;
+    border: solid #eaeaea .2px;
+    background-color: $color-main;
+    box-shadow: 0.05rem 0.05rem 0 #eaeaea;
+    border-radius: .25rem;
+    position: relative;
+    max-width: 40%;
+    transition: all 0.2s ease;
+    align-content: center;
+    //display: flex;
+    //flex-wrap: wrap;
+
+    &-name {
+      flex: 3 0 auto;
+      min-width: 100%;
+    }
+
+    &-count {
+      font-size: 1.5rem;
+
+    }
+
+    &-entity {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      &-name {
+        flex: 3 0 auto;
+        min-width: 100%;
+        order: 1;
+
+      }
+      &-count {
+        order: 3;
+        transform: translateY(.8rem);
+      }
+    }
+
+    &-button {
+      flex: 0 1 auto;
+
+    }
+
+
+    &:hover, &:active, &:focus {
+      //transform: translateY(-0.5rem);
+      background: #f8f8f8;
+      box-shadow: 0 0.55rem 0 #e0e0e0;
+
+    }
+  }
+
+
 
 .modal {
-  background-color: #f2f2f2;
+  background-color: $color-main;
   border: solid black 1px;
   height: 20rem;
   width: 20rem;
@@ -100,14 +216,18 @@ align-self: flex-end;
   align-self: center;
   flex-direction: column;
   justify-content: space-between;
-  padding: 1rem; }
-  .modal-input {
+  padding: 1rem;
+  z-index:10;
+
+  &-input {
     border: inherit;
     margin: 1rem;
     padding: 1rem; }
-  .modal-button {
+  &-button {
     margin: 1rem; }
-  .modal--false {
+  &--false {
     display: none; }
-  .modal--true {
+  &--true {
     display: flex; }
+
+}
