@@ -1,9 +1,37 @@
-$color-dark: #333;
+$color-dark: #555;
 $color-light: #f2f2f2;
 $bright: #ffffff;
+$accent: #ffffff;
+$darkest: #000;
 
-$color-main: $color-light;
-$color-alt: $color-dark;
+$color-main: $color-dark;
+$color-alt: $color-light;
+$color-neutral: #aaa;
+$text-color: #333;
+$text-rev: #f2f2f2;
+$app-bg: #333;
+
+$sm: 32rem;
+$md: 64rem;
+
+@mixin xs {
+  @media (max-width: #{$sm}) {
+    @content;
+  }
+}
+
+@mixin sm {
+  @media (min-width: #{$sm}) and (max-width: #{$md - 1px}) {
+    @content;
+  }
+}
+
+@mixin md {
+  @media (min-width: #{$md}) {
+    @content;
+  }
+}
+
 
 * {
   background: none repeat scroll 0 0 transparent;
@@ -15,36 +43,93 @@ $color-alt: $color-dark;
   text-decoration: none;
   text-indent: 0;
   box-sizing: border-box;
-  list-style-type: none; }
+  list-style-type: none;
+
+}
 
 html, body, #root, .App {
-  height: 100vh;
+  //height: 100vh;
   width: 100vw;
+  height: 100vh;
+  background: $app-bg;
+    color: $text-color;
   position: absolute; }
 
-.App {
+.view {
   display: flex;
   justify-content: space-around;
   justify-content: flex-start;
-  flex-flow: column; }
+  flex-flow: column;
+  padding: 2vw;
+  overflow: hidden;
+  &-player {
+    color: white;
+  }
+  &-inner {
+    display: flex;
+    flex-flow: column;
+  }
+}
+
+$card-height: 8rem;
+$card-width: 7rem;
 
 .deck {
   display: flex;
   flex-flow: row;
-  height: 10rem;
+  flex: 1 0 $card-height;
+  height: $card-height;
+  max-height: $card-height;
   cursor: pointer;
   align-items: flex-start;
+  justify-content: flex-start;
+  margin: 0 2vw 0 2vw;
+  position: relative;
+  &--true {
+    &:after {
+      content: "Next Turn";
+      position: absolute;
+      color: $bright;
+      font-size: 1rem;
+      text-transform: uppercase;
+      line-height: 4;
+      vertical-align: middle;
+      top: 2rem;
+      bottom: 2rem;
+      left: 2rem;
+      right: 10rem;
+      border-radius: 2rem;
+      vertical-align: center;
+      background-color: transparentize($color-main, 0.3);
+      border: solid $bright 0.2rem;
+      z-index: 20;
+      pointer-events: none;
+    }
+    &:hover {
+      &:after {
+        opacity: 0.5;
+      }
+    }
+
+  }
+
 }
 
 
 .card {
 
-  width: 10rem;
   height: 7rem;
-
+  width: 2rem;
+  flex: 0 2 3rem;
   position: relative;
   overflow-x: visible;
   z-index: 1;
+  transition: all ease .4s;
+  transform-style: preserve-3d;
+  transform-origin: center;
+  //transform: rotateY(0deg);
+  //backface-visibility: hidden;
+
 
 
 
@@ -52,24 +137,35 @@ html, body, #root, .App {
   position: absolute;
   border-radius: 0.3rem;
   border: solid #c9c9c9 0.3rem;
-  background-color: #f2f2f2;
-  box-shadow: -0.2rem 0.2rem 0 rgba(100,100,100,0.1);
-  display: flex;
-  justify-content: space-between;
-  flex-direction: column;
-  height: 10rem;
-  width: 7rem;
-  padding: .25rem;
+  transform-style: preserve-3d;
+  transition: inherit;
+
+  height: $card-height;
+  width: $card-width;
+  max-width: 300%;
+  color: $text-color;
+
+    &--active {
+        //animation: flip-vertical-right 0.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal both;
+    }
     &:hover {
       background: #fff;
-      box-shadow: -0.3rem 0.3rem 0 rgba(100,100,100,0.1);
+      box-shadow: -0.3rem 0.3rem 0 transparentize($darkest, 0.6);
     }
+  }
+
+  &-name {
+    //transition: all step-end .1s;
+    opacity: 1;
+    transition: opacity step-end .2s;
   }
 
   &-letter {
     font-weight: bold;
     font-size: 1.5rem;
-
+    opacity: 1;
+    transition: opacity step-end .2s;
+    //transition: all step-start .2s;
 
 
     &:first-child {
@@ -81,19 +177,58 @@ html, body, #root, .App {
     }
   }
 
+  &-back {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      //backface-visibility: hidden;
+      background-color: $color-main;
+      //display: none;
+      &:after {
+        //content: "Click to Flip";
+        color: white;
+
+      }
+  }
+
+  &-front {
+    background-color: white;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+      padding: .25rem;
+    top: 0;
+    left: 0;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
   &--faceup {
     z-index: 5;
+    .card-inner {
+      box-shadow: -0.2rem 0.2rem 0 transparentize($darkest, 0.6);
+    }
+
+  }
+
+  &--next {
+    //margin-left: auto;
   }
 
   &--facedown {
-    .card-letter, .card-name {
-      display: none;
-    }
-    .card-inner{
-      background-color: $color-alt;
-      border-color: #000;
-      box-shadow-color: #000;
-    }
+      transform: rotateY(-180deg);
+      .card-inner {
+        transform: translateX(-13vw);
+        box-shadow: 0.2rem 0.2rem 0 transparentize($darkest, 0.6);
+      }
+
   }
 }
 
@@ -104,7 +239,7 @@ html, body, #root, .App {
   padding: 0.3rem 0.6rem;
   max-width: 50%;
   border-radius: 10rem;
-  color: $bright;
+  color: $text-color;
   background: $color-alt;
   font-size: 1rem;
   align-self: center;
@@ -112,30 +247,65 @@ html, body, #root, .App {
   border: solid transparent 1px;
 
   &-shuffle {
-    width: 6rem;
-    margin: 0 3.5rem;
+    margin: 0 0 0 auto;
+    flex: 0 1 6rem;
     height: 3rem;
-    border-radius: 3rem;
+    //line-height: 3rem;
+    vertical-align: middle;
+    padding: 1.5rem;
     align-self: center;
     cursor: pointer;
+    @include xs {
+      position: absolute;
+      border-bottom-right-radius: 0;
+      border-top-right-radius: 0;
+      right: -4vw;
+      padding-left: 1rem;
+    }
+  }
 
+  &-count {
+    color: $text-rev;
+    font-weight: 900;
+    font-size: 1.5rem;
+    padding: 0.3rem 1rem;
+    text-align: center;
   }
 
   &-count-add {
-    background-color: #207010;
+    background-color: #1B5E20;
     order: 4;
   }
 
   &-count-minus {
-    background-color: #600000;
+    background-color: #B71C1C;
     order: 2;
   }
-  &:hover {
+
+  &-count-remove {
     background-color: $color-main;
-    border-color: $color-alt;
-    color: $color-alt;
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 1rem;
+    font-weight: 200;
+    margin: 0.5rem;
+    padding: 0.2rem;
+
   }
 
+  &:hover {
+    background-color: $color-main;
+    border-color: $color-neutral;
+    color: $color-alt;
+  }
+  &-settings {
+    &--true {
+      background-color: $color-main;
+      border-color: $color-neutral;
+      color: $color-alt;
+    }
+  }
 }
 
 .entities {
@@ -154,25 +324,33 @@ justify-content: space-around;
     padding: 0.5rem;
     margin: 1rem 0.5rem;
     flex: 1 1 auto;
-    border: solid #eaeaea .2px;
+    border: solid $color-neutral .2px;
     background-color: $color-main;
-    box-shadow: 0.05rem 0.05rem 0 #eaeaea;
+    box-shadow: -0.2rem 0.2rem 0 transparentize($darkest, 0.6);
     border-radius: .25rem;
     position: relative;
     max-width: 40%;
     transition: all 0.2s ease;
     align-content: center;
+    color: $bright;
+    font-weight: 300;
     //display: flex;
     //flex-wrap: wrap;
 
+    @include xs {
+      flex-flow: column;
+    }
+
     &-name {
       flex: 3 0 auto;
-      min-width: 100%;
+      color: inherit;
+      font-weight: inherit;
     }
 
     &-count {
       font-size: 1.5rem;
-
+      color: inherit;
+      font-weight: inherit;
     }
 
     &-entity {
@@ -180,14 +358,16 @@ justify-content: space-around;
       flex-wrap: wrap;
       justify-content: center;
       &-name {
-        flex: 3 0 auto;
-        min-width: 100%;
+        flex: 3 0 100%;
         order: 1;
+        @include xs {
+          flex: 3 0 auto;
+        }
 
       }
       &-count {
         order: 3;
-        transform: translateY(.8rem);
+        align-self: center;
       }
     }
 
@@ -199,8 +379,8 @@ justify-content: space-around;
 
     &:hover, &:active, &:focus {
       //transform: translateY(-0.5rem);
-      background: #f8f8f8;
-      box-shadow: 0 0.55rem 0 #e0e0e0;
+      background: lighten($color-main, 5%);
+      box-shadow: -0.3rem 0.3rem 0 transparentize($darkest, 0.6);
 
     }
   }
@@ -230,4 +410,113 @@ justify-content: space-around;
   &--true {
     display: flex; }
 
+}
+
+.settings-label {
+  color: $text-rev;
+}
+
+
+
+.charges {
+  display: flex;
+  margin: 0 auto;
+  cursor: pointer;
+}
+.charge {
+  position: relative;
+  height: 2rem;
+  width: 2rem;
+  border-radius: 1rem;
+  background-color: $color-main;
+  margin: 1rem;
+  &--active {
+    background-color: $accent;
+  }
+}
+
+.menu {
+  color: $text-rev;
+  background-color: #3E2723;
+  position: absolute;
+  z-index: 50;
+  right: -0.5rem;
+  top: 0;
+  transform: translateX(100%);
+  transition: all ease-in .2s;
+  padding: 3rem;
+  height: 100vh;
+  width: 25rem;
+  max-width: 100%;
+  box-shadow: -0.5rem 0 0 transparentize($darkest, 0.6);
+  &--true {
+    transform: translateX(0%);
+  }
+
+  &-section {
+    &-toggle {
+      position: relative;
+      display: inline-block;
+      width: 4rem;
+      height: 2rem;
+      &-function {
+        position: absolute;
+        visibility: hidden;
+        margin-left: -9999px;
+      }
+      &-display {
+        position: absolute;
+        display: block;
+        background: $color-alt;
+        height: 1.5rem;
+        width: 2.5rem;
+        cursor: pointer;
+        border-radius: 1rem;
+
+        input:checked + & {
+          &:before {
+            transform: translateX(100%);
+
+          }
+        }
+        &:before {
+          content: "";
+          margin: 0.25rem;
+          height: 1rem;
+          width: 1rem;
+          display: block;
+          background-color: $color-main;
+          transition: all ease .2s;
+          border-radius: 1rem;
+        }
+      }
+    }
+  }
+}
+@-webkit-keyframes flip-vertical-right {
+    0% {
+      -webkit-transform: rotateY(180deg);
+      transform: rotateY(180deg)
+    }
+
+    to {
+      -webkit-transform: rotateY(0);
+      transform: rotateY(0)
+
+    }
+}
+
+@keyframes flip-vertical-right {
+    0% {
+      -webkit-transform: rotateY(180deg);
+      transform: rotateY(180deg)
+
+    }
+
+    to {
+
+      -webkit-transform: rotateY(0);
+      transform: rotateY(0)
+
+    }
 }

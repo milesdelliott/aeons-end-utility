@@ -7,7 +7,7 @@ var aeonsUtility = {
   settings: {
     players: 4,
     nemesis: null,
-
+    open: false,
   },
 
   modal: {
@@ -15,6 +15,14 @@ var aeonsUtility = {
     parent: false,
     target: null
   },
+
+  activeView: "player",
+
+  views: {
+    utility: UtilityView,
+    player: PlayerView
+  },
+
 
   flipIndex: 0,
 
@@ -30,74 +38,91 @@ gravehold: {
     counters: []
   },
 
+  player: {
+      name: "Player",
+      life: 10,
+      totalCharges: 5,
+      currentCharges: 0,
+      counters: []
+    },
+
   turnDeck: [
       {
         id: "A",
         names: [
-          "Player", "Player One", "Player One", "Player One"
+          "Player", "Player One", "Player One", "Player One", "One or Two"
         ],
         letters: [
-          "P", "P1", "P1", "P1"
+          "P", "1", "1", "1", "1/2"
         ],
         faceUp: false,
-        player: true
+        player: true,
+        flipping: false
       },
       {
         id: "B",
         names: [
-          "Player", "Player Two", "Player Two", "Player Two"
+          "Player", "Player Two", "Player Two", "Player Two", "One or Two"
         ],
         letters: [
-          "P", "P2", "P2", "P2"
+          "P", "2", "2", "2", "1/2"
         ],
         faceUp: false,
-        player: true
+        player: true,
+        flipping: false
       },
       {
         id: "C",
         names: [
-          "Player", "Player One", "Player Three", "Player Three"
+          "Player", "Player One", "Player Three", "Player Three", "Three or Four"
         ],
         letters: [
-          "P", "P1", "P3", "P3"
+          "P", "1", "3", "3", "3/4"
         ],
         faceUp: false,
-        player: true
+        player: true,
+        flipping: false
       },
       {
         id: "D",
         names: [
-          "Player", "Player Two", "Wild Player", "Player Four"
+          "Player", "Player Two", "Wild Player", "Player Four", "Three or Four"
         ],
         letters: [
-          "P", "P2", "WP", "P4"
+          "P", "2", "W", "4", "3/4"
         ],
         faceUp: false,
-        player: true
+        player: true,
+        flipping: false
       },
       {
         id: "E",
         names: [
-          "Nemesis", "Nemesis", "Nemesis", "Nemesis"
+          "Nemesis", "Nemesis", "Nemesis", "Nemesis", "Nemesis"
         ],
         letters: [
-          "N", "N", "N", "N"
+          "N", "N", "N", "N", "N"
         ],
         faceUp: false,
-        player: false
+        player: false,
+        flipping: false
       },
       {
         id: "F",
         names: [
-          "Nemesis", "Nemesis", "Nemesis", "Nemesis"
+          "Nemesis", "Nemesis", "Nemesis", "Nemesis", "Nemesis"
         ],
         letters: [
-          "N", "N", "N", "N"
+          "N", "N", "N", "N", "N"
         ],
         faceUp: false,
-        player: false
+        player: false,
+        flipping: false
       },
     ],
+
+    deckHint: true,
+    flipping: false
 
 };
 
@@ -116,12 +141,12 @@ function Counter(props) {
 
   function handleClick(e) {
     e.preventDefault();
-    props.openModal(props.id, true, "nemesis");
+    props.openModal(props.position, true, "nemesis");
   }
 
   return (
     <li className="counter counter-sub-entity">
-      <h3 className="counter-name counter-sub-entity-name" onClick={handleClick}>{props.name}</h3>
+      <h3 className="counter-name counter-sub-entity-name" onClick={handleClick}>{props.name}</h3><CountButton isCounter onClick={props.remove} effectClass="remove" {...props}>X</CountButton>
       <CountButton aria-label="add count" isCounter onClick={props.addCount} effectClass="add" {...props}>+</CountButton><p className="counter-count counter-sub-entity-count">{props.life}</p><CountButton isCounter effectClass="minus" onClick={props.minusCount} aria-label="minus count" {...props}>-</CountButton>
     </li>
   );
@@ -146,7 +171,7 @@ function Entity(props) {
 function CountButton(props) {
   function handleClick(e) {
     e.preventDefault();
-    props.onClick(props.id, props.isCounter);
+    props.position ? props.onClick(props.position, props.isCounter) : props.onClick(props.id, props.isCounter);
   }
   return (
     <button role="button" className={"button button-count button-count-" + props.effectClass} onClick={handleClick}>
@@ -159,14 +184,18 @@ function CountButton(props) {
 function Card(props) {
   function handleClick(e) {
     e.preventDefault();
-    props.flipCard(props.id, props.deckName, props.flipIndex);
+    props.flipCard(props.deckName, props.flipIndex);
   }
   return (
     <div className={"card " + props.classes} onClick={handleClick}>
       <div className="card-inner">
-        <span className="card-letter">{props.letter}</span>
-        <h3 className="card-name">{props.name}</h3>
-        <span className="card-letter">{props.letter}</span>
+        <div className="card-front">
+          <span className="card-letter">{props.letter}</span>
+          <h3 className="card-name">{props.name}</h3>
+          <span className="card-letter">{props.letter}</span>
+        </div>
+        <div className="card-back">
+        </div>
       </div>
     </div>
   );
@@ -178,7 +207,7 @@ function Setting(props) {
     props.onClick(props.value);
   }
   return (
-    <button className="button button-settings" type="submit" onClick={handleClick}>{props.text}</button>
+    <button className={"button button-settings button-settings--" + (props.data.players === props.value)} type="submit" onClick={handleClick}>{props.text}</button>
   );
 }
 
@@ -190,6 +219,50 @@ function Debug(props) {
   return (
     <button className="button" role="button" onClick={handleClick}>Debug</button>
   );
+}
+
+function ToggleMenu(props) {
+  function handleClick(e) {
+    e.preventDefault();
+    props.onClick();
+  }
+  return (
+    <button className="button" role="button" onClick={handleClick}>{props.text ? props.text : "Settings"}</button>
+  );
+}
+
+function Menu(props) {
+    function handleChangeView(e) {
+      props.changeView();
+    }
+    return (
+      <div className={"menu  menu--" + props.data.open}>
+        <h2 className="menu-title">{props.title}</h2>
+        <section className="menu-section">
+          <label className="menu-section-label">Players</label>
+          <Setting onClick={props.changePlayerCount} data={props.data} value={1} text="1" />
+          <Setting onClick={props.changePlayerCount} data={props.data} value={2} text="2" />
+          <Setting onClick={props.changePlayerCount} data={props.data} value={3} text="3" />
+          <Setting onClick={props.changePlayerCount} data={props.data} value={4} text="4" />
+          <Setting onClick={props.changePlayerCount} data={props.data} value={5} text="4V" />
+        </section>
+        <section className="menu-section">
+          <label className="menu-section-label">Color Scheme</label>
+          <label className="menu-section-toggle">
+            <input className="menu-section-toggle-function" type="checkbox" />
+            <div className="menu-section-toggle-display"></div>
+          </label>
+        </section>
+        <section className="menu-section">
+          <label className="menu-section-label">Player View</label>
+          <label className="menu-section-toggle">
+            <input onChange={handleChangeView} className="menu-section-toggle-function" type="checkbox" />
+            <div className="menu-section-toggle-display"></div>
+          </label>
+        </section>
+        <ToggleMenu text="Close" onClick={props.toggleMenu} />
+      </div>
+    );
 }
 
 class Modal extends Component {
@@ -221,6 +294,8 @@ class Modal extends Component {
     this.setState({data: newData});
   };
 
+
+
   debug = () => {console.log(this.state)};
 
   render() {
@@ -231,12 +306,6 @@ class Modal extends Component {
           type="text"
           name="name"
           value={this.state.data.name ? this.state.data.name : ''}
-          onChange={this.handleValueChange}
-        />
-        <input className="modal-input"
-          type="text"
-          name="color"
-          value={this.state.data.color ? this.state.data.color : ''}
           onChange={this.handleValueChange}
         />
         { this.props.parent &&
@@ -254,18 +323,28 @@ class Modal extends Component {
 
 class Deck extends Component {
 
+  constructor(props) {
+    super (props);
+    console.log(this.props)
+  }
+
   componentWillMount() {
     this.props.shuffle(this.props.deckName);
   }
 
+  handleClick = (e) => {
+    e.preventDefault();
+    this.props.flipCard(this.props.deckName, this.props.flipIndex);
+  }
+
   render () {
     return (
-      <div className={"deck " + this.props.classes}>
+      <div className={"deck " + this.props.classes + " deck--" + this.props.deckHint} onClick={this.handleClick}>
         {this.props.deckObj.map((card, i) => {
             let n = card.names[this.props.settings.players - 1];
             let l = card.letters[this.props.settings.players - 1];
             return (
-                <Card name={n} classes={"card" + (card.faceUp ? "--faceup " : "--facedown ") + this.props.cardClasses} deckName={this.props.deckName} flipIndex={this.props.flipIndex} flipCard={this.props.flipCard} letter={l} key={card.id} id={card.id} order={i} />
+                <Card name={n} classes={"card" + (card.faceUp ? "--faceup " : "--facedown ") + " card" + (card.flipping ? "--active " : "--inactive ") + (i === this.props.flipIndex  ? "card--next " : "") + this.props.cardClasses} deckName={this.props.deckName} flipIndex={this.props.flipIndex} flipCard={this.props.flipCard} letter={l} key={card.id} id={card.id} order={i} />
             );
 
           }
@@ -277,12 +356,64 @@ class Deck extends Component {
 
 }
 
+function UtilityView(props) {
+  return (
+    <div className="view-inner">
+      <Deck settings={props.appState.settings} deckHint={props.appState.deckHint} shuffle={props.shuffle} flipCard={props.flipCard} flipIndex={props.appState.flipIndex} deckName="turnDeck" deckObj={props.appState.turnDeck} classes="turnDeck" cardClasses={"turnDeck turnDeck-card"}  />
+      <div className="entities">
+        <Entity name={props.appState.nemesis.name} openModal={props.openModal} id="nemesis" life={props.appState.nemesis.life} addCount={props.addLife} minusCount={props.minusLife} />
+        <Entity name={props.appState.gravehold.name} openModal={props.openModal} id="gravehold" life={props.appState.gravehold.life} addCount={props.addLife} minusCount={props.minusLife} />
+      </div>
+      <div className="controls">
+        <Debug onClick={props.debug} />
+        <ToggleMenu onClick={props.toggleMenu} />
+        <AddCounterButton countersTotal={props.appState.nemesis.counters.length} onClick={props.addCounter} />
+      </div>
+      <ul className="counters">
+        {props.appState.nemesis.counters.map((counter, i) =>
+          <Counter name={counter.name} openModal={props.openModal} id={counter.id} life={counter.life} addCount={props.addLife} minusCount={props.minusLife} remove={props.removeCounter} position={i} key={i} />
+        )}
+      </ul>
+      { props.appState.modal.active &&
+        <Modal saveData={props.saveData} active={props.appState.modal.active} target={props.appState.modal.target} parent={props.appState.modal.parent} data={props.appState.modal.parent ? props.appState[props.appState.modal.parent].counters[props.appState.modal.target] : props.appState[props.appState.modal.target]} />
+      }
+    </div>
+  );
+}
+
+function PlayerView(props) {
+  function renderCharges()  {
+    let charges = [];
+    for (let i = 0; i <= props.appState.player.totalCharges; i++ ) {
+      let classes = "charge "
+      if (props.appState.player.currentCharges > i ) {
+        classes +=  "charge--active";
+      }
+      charges.push(<li className={classes} key={i}></li>);
+
+    }
+    return charges;
+  }
+  function handleAddCharge(e) {
+    props.addCharge();
+  }
+  return (
+    <div className="view-inner">
+    <h1>{props.appState.player.name}</h1>
+    <h2>{props.appState.player.life}</h2>
+    <ul className="charges" onClick={handleAddCharge}>{renderCharges()}</ul>
+    <div className="controls">
+      <ToggleMenu onClick={props.toggleMenu} />
+    </div>
+    </div>
+  );
+}
+
 class App extends Component {
   constructor(props) {
     super (props);
     this.state = aeonsUtility;
     console.log(this.state);
-    //console.log();
   }
 
   componentDidMount() {
@@ -291,20 +422,29 @@ class App extends Component {
 
   debug = () => {console.log(this.state)};
 
-  flipCard = (cardID, deckName, order) => {
-    if (!this.state.flipping) {
-      this.setState({flipping: true});
-      let newState = this.state;
+  toggleMenu = () => {
+    let newState= this.state;
+    newState.settings.open = !newState.settings.open;
+    this.setState({newState})
+  };
 
-      if (newState.flipIndex < newState[deckName].length) {
-        newState[deckName][order].faceUp = !newState[deckName][order].faceUp;
-        newState.flipIndex++;
-      }
+  flipCard = (deckName, order) => {
+    if (deckName) {
+      if (!this.state.flipping) {
+        let newState = this.state;
+        newState.deckHint = false;
+        if (newState.flipIndex < newState[deckName].length && newState[deckName][order]) {
+          newState[deckName][order].faceUp = !newState[deckName][order].faceUp;
+          newState.flipIndex++;
+        }
+        newState.flipping = true;
+        this.setState(newState);
 
-      this.setState({newState});
-      setTimeout(()=> {this.setState({flipping: false})},1000);
-      if (newState[deckName][order] && !newState[deckName][order].player) {
-        this.nemesisTurn();
+
+        setTimeout(()=> {this.setState({flipping: false})},1000);
+        if (newState[deckName][order] && !newState[deckName][order].player) {
+          this.nemesisTurn();
+        }
       }
     }
   }
@@ -363,10 +503,40 @@ minusLife = (entity, isCounter) => {
   this.setState({newState});
 }
 
+removeCounter = (entity) => {
+  let newState = this.state;
+  newState.nemesis.counters.splice(entity, 1);
+  this.setState({newState});
+}
+
+
   changePlayerCount = (playerCount) => {
     let newSettings = this.state.settings;
     newSettings.players = playerCount;
     this.setState({settings: newSettings});
+  }
+
+  changeView = (event) => {
+    let newView = this.state.activeView;
+    switch (newView) {
+      case "utility":
+        newView = "player";
+        break;
+      case "player":
+        newView = "utility";
+        break;
+      default:
+        newView = "utility";
+        break;
+    }
+
+    this.setState({activeView: newView});
+  }
+
+  addCharge = () => {
+    let newState = this.state;
+    newState.player.currentCharges++;
+    this.setState({newState});
   }
 
   shuffle = (deckName) => {
@@ -452,28 +622,21 @@ minusLife = (entity, isCounter) => {
     return (
 
       <div className="App">
-        <div className="settings">
-          <span className="settings-label">Players: </span>
-          <Setting onClick={this.changePlayerCount} value={1} text="1" />
-          <Setting onClick={this.changePlayerCount} value={2} text="2" />
-          <Setting onClick={this.changePlayerCount} value={3} text="3" />
-          <Setting onClick={this.changePlayerCount} value={4} text="4" />
-        </div>
-        <Deck settings={this.state.settings} shuffle={this.shuffle} flipCard={this.flipCard} flipIndex={this.state.flipIndex} deckName="turnDeck" deckObj={this.state.turnDeck} classes="turnDeck" cardClasses={"turnDeck turnDeck-card"}  />
-        <div className="entities">
-          <Entity name={this.state.nemesis.name} openModal={this.openModal} id="nemesis" life={this.state.nemesis.life} addCount={this.addLife} minusCount={this.minusLife} />
-          <Entity name={this.state.gravehold.name} openModal={this.openModal} id="gravehold" life={this.state.gravehold.life} addCount={this.addLife} minusCount={this.minusLife} />
-        </div>
-        <AddCounterButton countersTotal={this.state.nemesis.counters.length} onClick={this.addCounter} />
-        <ul className="counters">
-          {this.state.nemesis.counters.map((counter, i) =>
-            <Counter name={counter.name} openModal={this.openModal} id={counter.id} life={counter.life} addCount={this.addLife} minusCount={this.minusLife} key={i} />
-          )}
-        </ul>
-        { this.state.modal.active &&
-          <Modal saveData={this.saveData} active={this.state.modal.active} target={this.state.modal.target} parent={this.state.modal.parent} data={this.state.modal.parent ? this.state[this.state.modal.parent].counters[this.state.modal.target] : this.state[this.state.modal.target]} />
+        <div className={"view view-"+this.state.activeView}>
+
+        {
+          this.state.activeView === "utility" &&
+            <UtilityView openModal={this.openModal} debug={this.debug} saveData={this.saveData} toggleMenu={this.toggleMenu} shuffle={this.shuffle} flipCard={this.flipCard} addLife={this.addLife} minusLife={this.minusLife} addCounter={this.addCounter} removeCounter={this.removeCounter} appState={this.state}  {...this.props} />
         }
-        <Debug onClick={this.debug} />
+
+        {
+          this.state.activeView === "player" &&
+            <PlayerView appState={this.state} addCharge={this.addCharge} toggleMenu={this.toggleMenu} />
+        }
+
+
+        </div>
+        <Menu changePlayerCount={this.changePlayerCount} changeView={this.changeView} title="Settings" data={this.state.settings} toggleMenu={this.toggleMenu} />
       </div>
     );
   }
